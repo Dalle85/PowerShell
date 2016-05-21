@@ -134,7 +134,7 @@ foreach ($URL in $DURLS) {
 
 # --------------------------------------------------------------------------------------------------------------------
 # Download files with redirected links using Invoke-Rebrequest to find the target link
-# Inspect website by using the following command: (Invoke-WebRequest –URI ‘LINK’).Links
+# Inspect websites by using the following command: (Invoke-WebRequest –URI ‘LINK’).Links
 # --------------------------------------------------------------------------------------------------------------------
 
 foreach ($URL in $RURLS) {
