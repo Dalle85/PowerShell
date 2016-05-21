@@ -47,7 +47,6 @@ $DURLS = @(
   "https://download.spotify.com/SpotifySetup.exe"
   #Steam
   "https://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe"
-
 )
 
 
@@ -60,7 +59,6 @@ $RURLS = @(
   "http://www.snapfiles.com/downloads/7zip/dl7zip.html"
   #Tixati x64
   "http://www.snapfiles.com/downloads/tixati/dltixati.html"
-
 )
 
 
@@ -79,7 +77,6 @@ try {
     New-Item $DownloadPath -ItemType Directory | Out-Null
     Write-Host "$DownloadPath does not exist, creating..."
     Write-Host ""
-
   }
 }
 
@@ -87,7 +84,6 @@ catch {
 
   Write-Host "An error occurred creating destination folder (`'$DownloadPath`'), Please check the path,and try again."
   break
-
 }
 
 
@@ -108,20 +104,17 @@ function StartDownloading () {
       wget $URL -OutFile $DownloadPath\$FileName -ErrorVariable Error
       if ($Error) { throw "" }
       Write-Host "`Done." -ForegroundColor "GREEN"
-
     }
 
     else {
 
       Write-Host "$FileName already exists, skipping..." -ForegroundColor Yellow
-
     }
   }
 
   catch {
 
     Write-Host "An error occurred while downloading `'$FileName`'" -ForegroundColor Yellow
-
   }
 }
 
@@ -133,7 +126,6 @@ function StartDownloading () {
 foreach ($URL in $DURLS) {
 
   StartDownloading
-
 }
 
 
@@ -148,7 +140,6 @@ foreach ($URL in $RURLS) {
        Where { $_.href -like "*7z*x64*" -or $_.href -like "*tixati*64*" }).href
 
   StartDownloading
-
 }
 
 
