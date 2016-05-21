@@ -76,6 +76,7 @@ try {
 
     ##Creates the destination folder if it does not exist 
     New-Item $DownloadPath -ItemType Directory | Out-Null
+    
     Write-Host "$DownloadPath does not exist, creating..."
     Write-Host ""
   }
@@ -83,7 +84,7 @@ try {
 
 catch {
 
-  Write-Host "An error occurred creating destination folder (`'$DownloadPath`'), Please check the path,and try again."
+  Write-Host "An error occurred while creating the destination folder (`'$DownloadPath`'), Please check the path,and try again."
   break
 }
 
