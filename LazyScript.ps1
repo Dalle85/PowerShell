@@ -33,19 +33,19 @@ Write-Host ""
 
 $DURLS = @(
 
-  #Battle.net
+  # Battle.net
   "http://eu.battle.net/download/getInstaller?os=win&installer=Battle.net-Setup.exe"
-  #Google Chrome x64
+  # Google Chrome x64
   "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi"
-  #MediaPlayerDotNet x64
+  # MediaPlayerDotNet x64
   "http://mpdn.zachsaw.com/Latest/Installers/MediaPlayerDotNet_x64_Installer.exe"
-  #MediaPlayerDotNet Extensions
+  # MediaPlayerDotNet Extensions
   "https://mpdn.zachsaw.com/Latest/Installers/MPDN-Extensions_Installer.exe"
-  #Skype
+  # Skype
   "https://download.skype.com/6b299e4bcff18dc8b24d41ae51d68173/SkypeSetup.msi"
-  #Spotify
+  # Spotify
   "https://download.spotify.com/SpotifySetup.exe"
-  #Steam
+  # Steam
   "https://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe"
 )
 
@@ -56,9 +56,9 @@ $DURLS = @(
 
 $RURLS = @(
 
-  #7-Zip x64
+  # 7-Zip x64
   "http://www.snapfiles.com/downloads/7zip/dl7zip.html"
-  #Tixati x64
+  # Tixati x64
   "http://www.snapfiles.com/downloads/tixati/dltixati.html"
 )
 
@@ -67,14 +67,15 @@ $RURLS = @(
 # Destination folder where the files will be downloaded, create if it does not exist
 # --------------------------------------------------------------------------------------------------------------------
 
+# Change this one if necessary
 $DownloadPath = "$PSScriptRoot\Downloads"
 
 try {
 
-  ## Return true if the Destination Folder exists, otherwise return false 
+  # Return true if the Destination Folder exists, otherwise return false 
   if (!(Test-Path "$DownloadPath" -PathType container)) {
 
-    ##Creates the destination folder if it does not exist 
+    # Creates the destination folder if it does not exist 
     New-Item $DownloadPath -ItemType Directory | Out-Null
     
     Write-Host "$DownloadPath does not exist, creating..."
@@ -95,12 +96,12 @@ catch {
 
 function StartDownloading () {
 
-  ## Get the file name 
+  # Get the file name 
   $FileName = $URL.Split('/')[-1].Split('=')[-1]
 
   try {
 
-    ## Return true if the file exists, otherwise return false 
+    # Return true if the file exists, otherwise return false 
     if (!(Test-Path "$DownloadPath\$FileName")) {
       Write-Host "$FileName... " -NoNewline
       wget $URL -OutFile $DownloadPath\$FileName -ErrorVariable Error
