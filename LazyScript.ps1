@@ -103,6 +103,7 @@ try {
 
   # Return true if the file exists, otherwise return false 
   if (!(Test-Path "$DownloadPath\$FileName")) {
+    
     Write-Host "$FileName... " -NoNewline
     wget $URL -OutFile $DownloadPath\$FileName -ErrorVariable Error
     if ($Error) { throw "" }
@@ -141,7 +142,7 @@ foreach ($URL in $RURLS) {
 
   $URL = ((wget $URL).Links | `
        Where { $_.href -like "*7z*x64*" -or $_.href -like "*tixati*64*" }).href
-
+       
   StartDownloading
 }
 
