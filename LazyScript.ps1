@@ -112,13 +112,13 @@ try {
 
   else {
 
-    Write-Host "$FileName already exists, skipping..." -ForegroundColor Yellow
+    Write-Host "$FileName already exists, skipping..." -ForegroundColor "Yellow"
   }
 }
 
 catch {
 
-  Write-Host "An error occurred while downloading `'$FileName`'" -ForegroundColor Yellow
+  Write-Host "An error occurred while downloading `'$FileName`'" -ForegroundColor "RED"
   }
 }
 
