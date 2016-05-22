@@ -110,7 +110,7 @@ try {
     Write-Host "$FileName... " -NoNewline
     wget $URL -OutFile $DownloadPath\$FileName -ErrorVariable Error
     if ($Error) { throw "" }
-    Write-Host "`Downloaded successfully." -ForegroundColor "GREEN"
+    Write-Host "`Done." -ForegroundColor "GREEN"
   }
 
   else {
