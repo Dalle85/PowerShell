@@ -107,19 +107,19 @@ try {
   # Return true if the file exists, otherwise return false 
   if (!(Test-Path "$DownloadPath\$FileName")) {
     
-    Write-Host "$FileName... " -NoNewline
-    Write-Progress -Activity "Downloading $FileName to $DownloadPath" -Status "Please wait..." -CurrentOperation " "
+    Write-Host "`'$FileName... " -NoNewline
+    Write-Progress -Activity "Downloading `'$FileName`' to `'$DownloadPath`'" -Status "Please wait..." -CurrentOperation " "
     
     wget $URL -OutFile $DownloadPath\$FileName -ErrorVariable Error
     if ($Error) { throw "" }
     
     Write-Host "`Done." -ForegroundColor "GREEN"
-    Write-Progress -Activity "$FileName" -Status "Done." -CurrentOperation " "    
+    Write-Progress -Activity `'$FileName`' -Status "Done." -CurrentOperation " "    
   }
 
   else {
 
-    Write-Host "$FileName already exists, skipping..." -ForegroundColor "Yellow"
+    Write-Host "`'$FileName`' already exists, skipping..." -ForegroundColor "YELLOW"
   }
 }
 
