@@ -1,5 +1,4 @@
-﻿<#
-
+<#
 .DESCRIPTION
 This script will download the latest executables of the specified applications to .\Downloads using Invoke-Webrequest
 
@@ -12,9 +11,9 @@ Dalle, 2016-05-21
 #>
 
 
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 # Start fresh
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 
 Clear-Host
 
@@ -27,9 +26,9 @@ Write-Host "Script started..."
 Write-Host ""
 
 
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 # Direct links that doesn't change, latest version is always using the same filename
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 
 $DURLS = @(
 
@@ -37,6 +36,8 @@ $DURLS = @(
   "http://eu.battle.net/download/getInstaller?os=win&installer=Battle.net-Setup.exe"
   # Google Chrome x64
   "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi"
+  # iTunes x64
+  "https://secure-appldnld.apple.com/itunes12/031-62806-20160516-DC2224E6-1959-11E6-BC22-D2135529DBDF/iTunes6464Setup.exe"
   # MediaPlayerDotNet x64
   "http://mpdn.zachsaw.com/Latest/Installers/MediaPlayerDotNet_x64_Installer.exe"
   # MediaPlayerDotNet Extensions
@@ -47,12 +48,14 @@ $DURLS = @(
   "https://download.spotify.com/SpotifySetup.exe"
   # Steam
   "https://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe"
+  # Uplay
+  "https://ubistatic3-a.akamaihd.net/orbit/launcher_installer/UplayInstaller.exe"
 )
 
 
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 # Redirected links where the filename change, therefore we use the href link to download the latest version
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 
 $RURLS = @(
 
@@ -63,9 +66,9 @@ $RURLS = @(
 )
 
 
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 # Destination folder where the files will be downloaded, create if it does not exist
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 
 # Change this one if necessary
 $DownloadPath = "$PSScriptRoot\Downloads"
@@ -85,14 +88,14 @@ try {
 
 catch {
 
-  Write-Host "An error occurred while creating the destination folder (`'$DownloadPath`'), Please check the path,and try again."
+  Write-Host "An error occurred while creating the destination folder (`'$DownloadPath`'), please check the path and try again."
   break
 }
 
 
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 # This function will check if the file exists, if not it will start downloading to the download path
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 
 function StartDownloading () {
 
@@ -107,7 +110,7 @@ try {
     Write-Host "$FileName... " -NoNewline
     wget $URL -OutFile $DownloadPath\$FileName -ErrorVariable Error
     if ($Error) { throw "" }
-    Write-Host "`Done." -ForegroundColor "GREEN"
+    Write-Host "`Downloaded successfully." -ForegroundColor "GREEN"
   }
 
   else {
@@ -123,9 +126,11 @@ catch {
 }
 
 
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 # Download files with direct links, nothing else
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
+
+Write-Host "Processing direct links..."
 
 foreach ($URL in $DURLS) {
 
@@ -133,23 +138,26 @@ foreach ($URL in $DURLS) {
 }
 
 
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 # Download files with redirected links using Invoke-Rebrequest to find the target link
 # Inspect websites by using the following command: (Invoke-WebRequest –URI ‘LINK’).Links
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
+
+Write-Host ""
+Write-Host "Processing redirected links..."
 
 foreach ($URL in $RURLS) {
 
   $URL = ((wget $URL).Links | `
-       Where { $_.href -like "*7z*x64*" -or $_.href -like "*tixati*64*" }).href
+       Where {$_.href -like "*7z*x64*" -or $_.href -like "*tixati*64*"}).href
        
   StartDownloading
 }
 
 
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 # Happy ending
-# --------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------
 
 Write-Host ""
 Write-Host "Script finished in $((Get-Date).Subtract($Start).Seconds) second(s)."
