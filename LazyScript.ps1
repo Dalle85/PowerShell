@@ -96,28 +96,28 @@ catch {
 
 function StartDownloading () {
 
-  # Get the file name 
-  $FileName = $URL.Split('/')[-1].Split('=')[-1]
+# Get the file name 
+$FileName = $URL.Split('/')[-1].Split('=')[-1]
 
-  try {
+try {
 
-    # Return true if the file exists, otherwise return false 
-    if (!(Test-Path "$DownloadPath\$FileName")) {
-      Write-Host "$FileName... " -NoNewline
-      wget $URL -OutFile $DownloadPath\$FileName -ErrorVariable Error
-      if ($Error) { throw "" }
-      Write-Host "`Done." -ForegroundColor "GREEN"
-    }
-
-    else {
-
-      Write-Host "$FileName already exists, skipping..." -ForegroundColor Yellow
-    }
+  # Return true if the file exists, otherwise return false 
+  if (!(Test-Path "$DownloadPath\$FileName")) {
+    Write-Host "$FileName... " -NoNewline
+    wget $URL -OutFile $DownloadPath\$FileName -ErrorVariable Error
+    if ($Error) { throw "" }
+    Write-Host "`Done." -ForegroundColor "GREEN"
   }
 
-  catch {
+  else {
 
-    Write-Host "An error occurred while downloading `'$FileName`'" -ForegroundColor Yellow
+    Write-Host "$FileName already exists, skipping..." -ForegroundColor Yellow
+  }
+}
+
+catch {
+
+  Write-Host "An error occurred while downloading `'$FileName`'" -ForegroundColor Yellow
   }
 }
 
