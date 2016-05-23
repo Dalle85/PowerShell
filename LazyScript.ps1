@@ -32,6 +32,8 @@ Write-Host ""
 
 $DURLS = @(
 
+  # Adobe Flash Player
+  "http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player.exe"
   # Battle.net
   "http://eu.battle.net/download/getInstaller?os=win&installer=Battle.net-Setup.exe"
   # Citrix Receiver
@@ -50,6 +52,8 @@ $DURLS = @(
   "https://download.spotify.com/SpotifySetup.exe"
   # Steam
   "https://steamcdn-a.akamaihd.net/client/installer/SteamSetup.exe"
+  # TeamViewer
+  "http://download.teamviewer.com/download/TeamViewer_Setup.exe"
   # Uplay
   "https://ubistatic3-a.akamaihd.net/orbit/launcher_installer/UplayInstaller.exe"
 )
@@ -63,8 +67,14 @@ $RURLS = @(
 
   # 7-Zip x64
   "http://www.snapfiles.com/downloads/7zip/dl7zip.html"
+  # Adobe Flash Player for IE
+  #"http://www.snapfiles.com/downloads/flashplayerie/dlflashplayerie.html"
   # FileZilla
-  "http://www.snapfiles.com/downloads/filezilla/dlfilezilla.html"
+  "https://sourceforge.net/projects/filezilla/files/latest/download"
+  # FireFox
+  "http://www.snapfiles.com/downloads/phoenixmoz/dlphoenixmoz.html"
+  # KeePass
+  "https://sourceforge.net/projects/keepass/files/latest/download"
   # Tixati x64
   "http://www.snapfiles.com/downloads/tixati/dltixati.html"
 )
@@ -111,25 +121,25 @@ try {
   # Return true if the file exists, otherwise return false 
   if (!(Test-Path "$DownloadPath\$FileName")) {
     
-    Write-Host "`'$FileName... " -NoNewline
-    Write-Progress -Activity "Downloading `'$FileName`' to `'$DownloadPath`'" -Status "Please wait..." -CurrentOperation " "
+    Write-Progress -Activity "Downloading `'$FileName`' to `'$DownloadPath`'" -Status "Please wait..."
     
-    wget $URL -OutFile $DownloadPath\$FileName -ErrorVariable Error
+    wget "$URL" -OutFile $DownloadPath\$FileName -ErrorVariable Error
     if ($Error) { throw "" }
     
-    Write-Host "`Done." -ForegroundColor "GREEN"
-    Write-Progress -Activity `'$FileName`' -Status "Done." -CurrentOperation " "    
+    Write-Progress -Activity `'$FileName`' -Status "Done." 
+    Write-Host "`'$FileName`' " -NoNewline; Write-Host "downloaded successfully!" -ForegroundColor "GREEN"
+    
   }
 
   else {
 
-    Write-Host "`'$FileName`' already exists, skipping..." -ForegroundColor "YELLOW"
+    Write-Host "`'$FileName`' " -NoNewLine; Write-Host "already exists, skipping..." -ForegroundColor "YELLOW"
   }
 }
 
 catch {
 
-  Write-Host "An error occurred while downloading `'$FileName`'" -ForegroundColor "RED"
+  Write-Host "`'$FileName`' " -NoNewline; Write-Host "failed, check the link and try again..." -ForegroundColor "RED"
   }
 }
 
@@ -139,6 +149,7 @@ catch {
 # ------------------------------------------------------------------------------------------------------------------------
 
 Write-Host "Processing direct links..."
+Write-Host "───────────────────────────────────────────────────────────────────────────"
 
 foreach ($URL in $DURLS) {
 
@@ -147,17 +158,24 @@ foreach ($URL in $DURLS) {
 
 
 # ------------------------------------------------------------------------------------------------------------------------
-# Download files with redirected links using Invoke-Rebrequest to find the target link
-# Inspect websites by using the following command: (Invoke-WebRequest –URI ‘LINK’).Links
+# Download files with redirected links using wget to find the target link
+# Inspect websites by using the following command: (wget –URI ‘LINK’).Links
 # ------------------------------------------------------------------------------------------------------------------------
 
 Write-Host ""
 Write-Host "Processing redirected links..."
+Write-Host "───────────────────────────────────────────────────────────────────────────"
 
 foreach ($URL in $RURLS) {
 
-  $URL = ((wget $URL).Links | `
-       Where {$_.href -like "*7z*x64*" -or $_.href -like "*filezilla*64*" -or $_.href -like "*tixati*64*"}).href
+  $URL = ((wget $URL).Links | Where { `
+    $_.href -like "*7z*x64*" -or `
+    $_.href -like "*filezilla*64*" -or `
+    $_.href -like "*flashplayer*" -or `
+    $_.href -like "*keepass*setup*" -or `
+    $_.href -like "*win64*firefox*" -or `
+    $_.href -like "*tixati*64*"
+  }).href
        
   StartDownloading
 }
