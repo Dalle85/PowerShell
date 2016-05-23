@@ -34,6 +34,8 @@ $DURLS = @(
 
   # Battle.net
   "http://eu.battle.net/download/getInstaller?os=win&installer=Battle.net-Setup.exe"
+  # Citrix Receiver
+  "https://downloadplugins.citrix.com/Windows/CitrixReceiverWeb.exe"
   # Google Chrome x64
   "https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi"
   # iTunes x64
