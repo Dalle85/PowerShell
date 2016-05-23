@@ -63,6 +63,8 @@ $RURLS = @(
 
   # 7-Zip x64
   "http://www.snapfiles.com/downloads/7zip/dl7zip.html"
+  # FileZilla
+  "http://www.snapfiles.com/downloads/filezilla/dlfilezilla.html"
   # Tixati x64
   "http://www.snapfiles.com/downloads/tixati/dltixati.html"
 )
@@ -155,7 +157,7 @@ Write-Host "Processing redirected links..."
 foreach ($URL in $RURLS) {
 
   $URL = ((wget $URL).Links | `
-       Where {$_.href -like "*7z*x64*" -or $_.href -like "*tixati*64*"}).href
+       Where {$_.href -like "*7z*x64*" -or $_.href -like "*filezilla*64*" -or $_.href -like "*tixati*64*"}).href
        
   StartDownloading
 }
