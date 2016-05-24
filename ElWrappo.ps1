@@ -79,7 +79,7 @@ Write-Output ""
 # Search source-path for files ending with .msi or .exe, then try to install them one at a time and finally stop logging
 # ---------------------------------------------------------------------------------------------------------------------------
 
-$Installers = Get-ChildItem -Path $SourcePath -Recurse –Include *.msi, *.exe
+$Installers = Get-ChildItem "-Path $SourcePath -Recurse –Include *.msi, *.exe"
 $Installers | % {
 
   if ($_.Name -like "*.exe") {
