@@ -17,7 +17,7 @@ C:\
 └─── Install_Wrapper.ps1
 
 Set the install command to:
-PowerShell.exe –ExecutionPolicy ByPass -WindowStyle Hidden –File Install_Wrapper.ps1
+PowerShell.exe –ExecutionPolicy ByPass -WindowStyle Hidden –File ElWrappo.ps1
 
 Logfile will always be named after the folder where the script is located, let's say it would be stored in:
 "\\SERVER\MDTProduction$\Applications\Install - 7-Zip (Latest) - x64"
