@@ -97,7 +97,6 @@ catch {
 
 # Download applications with direct links, nothing else
 Write-Host "Processing direct links..."
-Write-Host "───────────────────────────────────────────────────────────────────────────"
 
 foreach ($URL in $DURLS) {
   StartDownloading
@@ -106,7 +105,6 @@ foreach ($URL in $DURLS) {
 # Download files with redirected links using wget to find the target link
 Write-Host ""
 Write-Host "Processing redirected links..."
-Write-Host "───────────────────────────────────────────────────────────────────────────"
 
 foreach ($URL in $RURLS) {
   $URL = ((wget $URL).Links | 
