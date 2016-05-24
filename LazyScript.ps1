@@ -1,6 +1,6 @@
 <#
 .DESCRIPTION
-This script will download the latest executables of the specified applications to .\Downloads using Invoke-Webrequest
+This script will download the latest executables of the specified applications to .\Downloads using wget
 
 .NOTES
 You need to run this script as local administrator
@@ -11,24 +11,24 @@ Dalle, 2016-05-21
 #>
 
 
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 # Start fresh
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 
 Clear-Host
 
 $PSHost = Get-Host
 $PSWindow = $PSHost.UI.RawUI
-$PSWindow.WindowTitle = “Too lazy to download manually...”
+$PSWindow.WindowTitle = “LazyScript...”
 $Start = Get-Date
 
 Write-Host "Script started..."
 Write-Host ""
 
 
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 # Direct links that doesn't change, latest version is always using the same filename
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 
 $DURLS = @(
 
@@ -59,30 +59,34 @@ $DURLS = @(
 )
 
 
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 # Redirected links where the filename change, therefore we use the href link to download the latest version
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 
 $RURLS = @(
 
   # 7-Zip x64
   "http://www.snapfiles.com/downloads/7zip/dl7zip.html"
   # Adobe Flash Player for IE
-  #"http://www.snapfiles.com/downloads/flashplayerie/dlflashplayerie.html"
+  "http://www.snapfiles.com/downloads/flashplayerie/dlflashplayerie.html"
   # FileZilla
   "https://sourceforge.net/projects/filezilla/files/latest/download"
   # FireFox
   "http://www.snapfiles.com/downloads/phoenixmoz/dlphoenixmoz.html"
+  # Java x64
+  "http://www.java.com/sv/download/manual.jsp"
   # KeePass
   "https://sourceforge.net/projects/keepass/files/latest/download"
+  #Notepad++
+  "http://www.snapfiles.com/downloads/notepadplus/dlnotepadplus.html"
   # Tixati x64
   "http://www.snapfiles.com/downloads/tixati/dltixati.html"
 )
 
 
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 # Destination folder where the files will be downloaded, create if it does not exist
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 
 # Change this one if necessary
 $DownloadPath = "$PSScriptRoot\Downloads"
@@ -107,9 +111,9 @@ catch {
 }
 
 
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 # This function will check if the file exists, if not it will start downloading to the download path
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 
 function StartDownloading () {
 
@@ -144,9 +148,9 @@ catch {
 }
 
 
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 # Download files with direct links, nothing else
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 
 Write-Host "Processing direct links..."
 Write-Host "───────────────────────────────────────────────────────────────────────────"
@@ -157,10 +161,10 @@ foreach ($URL in $DURLS) {
 }
 
 
-# ------------------------------------------------------------------------------------------------------------------------
+# ------------------------------------------------------------------------------------------------------------------------------
 # Download files with redirected links using wget to find the target link
-# Inspect websites by using the following command: (wget –URI ‘LINK’).Links
-# ------------------------------------------------------------------------------------------------------------------------
+# Inspect websites by using the following command: (wget –URI ‘https://notepad-plus-plus.org/download/v6.9.2.html’).Links
+# ------------------------------------------------------------------------------------------------------------------------------
 
 Write-Host ""
 Write-Host "Processing redirected links..."
@@ -168,22 +172,15 @@ Write-Host "──────────────────────�
 
 foreach ($URL in $RURLS) {
 
-  $URL = ((wget $URL).Links | Where { `
-    $_.href -like "*7z*x64*" -or `
-    $_.href -like "*filezilla*64*" -or `
-    $_.href -like "*flashplayer*" -or `
-    $_.href -like "*keepass*setup*" -or `
-    $_.href -like "*win64*firefox*" -or `
-    $_.href -like "*tixati*64*"
-  }).href
+  $URL = ((wget $URL).Links | 
+    Where { `
+            $_.href -like "*7z*x64*" -or $_.href -like "*filezilla*64*" -or $_.href -like "*flashplayer*" -or
+            $_.innerText -like "*offline*64-bit*" -or $_.href -like "*keepass*setup*" -or $_.href -like "*npp*installer*" -or
+            $_.href -like "*win64*firefox*" -or $_.href -like "*tixati*64*"
+    }).href
        
   StartDownloading
 }
-
-
-# ------------------------------------------------------------------------------------------------------------------------
-# Happy ending
-# ------------------------------------------------------------------------------------------------------------------------
 
 Write-Host ""
 Write-Host "Script finished in $((Get-Date).Subtract($Start).Seconds) second(s)."
