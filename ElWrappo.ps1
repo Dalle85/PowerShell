@@ -9,7 +9,7 @@ time we donload a new version of an application. Unless all files share the same
 
 .USAGE
 Make sure that the folder structure looks something like this, give the Application a good name and then import
-the folder in your MDT console.
+the folder from your MDT console.
 
 E:.
 └───Install - Application - x64
