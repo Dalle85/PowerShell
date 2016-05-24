@@ -65,13 +65,13 @@ $Installers | % {
   if ($_.Name -like "*.exe") {
     Write-Output "Attempting to install $_ with the following switch(es): $Switches"
     Start-Process "$_" "-ArgumentList $Switches -NoNewWindow -Wait"
-    Write-Output "Setup finished with exitcode $LastExitCode"
+    Write-Output "Setup finished with exitcode: $LastExitCode"
   }
 
   elseif ($_.Name -like "*.msi") {
     Write-Output "Attempting to install $_ with the following switch(es): /i $Switches"
     Start-Process msiexec -ArgumentList "/i "$_" $Switches -NoNewWindow -Wait"
-    Write-Output "Setup finished with exitcode $LastExitCode"
+    Write-Output "Setup finished with exitcode: $LastExitCode"
   }
 }
 
