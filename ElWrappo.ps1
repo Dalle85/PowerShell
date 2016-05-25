@@ -40,7 +40,6 @@ try {
   $LogPath = $TSEnv.Value("LogPath")
   $LogFile = $LogPath + "\" + "$ScriptName.txt"
 }
-
 catch {
   $MDTIntegration = "NO"
   $LogPath = $env:TEMP
@@ -67,7 +66,6 @@ $Installers | % {
     Start-Process "$_" "-ArgumentList $Switches -NoNewWindow -Wait"
     Write-Output "Setup finished with exitcode: $LastExitCode"
   }
-
   elseif ($_.Name -like "*.msi") {
     Write-Output "Attempting to install $_ with the following switch(es): /i $Switches"
     Start-Process msiexec -ArgumentList "/i "$_" $Switches -NoNewWindow -Wait"
