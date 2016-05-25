@@ -12,10 +12,10 @@ Make sure that the folder structure looks something like this, give the Applicat
 the folder from your MDT console.
 
 E:.
-└───Install - Application - x64
-    ├───Source
-    │   └───MyApplication.exe
-    └───ElWrappo.ps1
+|____Install - Application - x64
+     |_____Source
+     |     |_____MyApplication.exe
+     |_____ElWrappo.ps1
 
 Set the install command to: PowerShell.exe –ExecutionPolicy ByPass -WindowStyle Hidden –File ElWrappo.ps1
 The logfile will be named after what you named your application folder.
@@ -35,7 +35,7 @@ $SourcePath = "$PSScriptRoot\Source"
 $ScriptName = Split-Path $PSScriptRoot -Leaf
 
 try {
-  $TSEnv = New-Object -COMObject Microsoft.SMS.TSEnvironment
+  $TSEnv = New-Object -ComObject Microsoft.SMS.TSEnvironment
   $MDTIntegration = "YES"
   $LogPath = $TSEnv.Value("LogPath")
   $LogFile = $LogPath + "\" + "$ScriptName.txt"
@@ -58,7 +58,7 @@ Write-Output "$ScriptName - Log: $LogFile"
 Write-Output ""
 
 #Start Wrapping
-$Installers = Get-ChildItem "-Path $SourcePath -Recurse –Include *.msi, *.exe"
+$Installers = Get-ChildItem -Path $SourcePath -Recurse –Include *.msi, *.exe
 $Installers | % {
 
   if ($_.Name -like "*.exe") {
@@ -68,7 +68,7 @@ $Installers | % {
   }
   elseif ($_.Name -like "*.msi") {
     Write-Output "Attempting to install $_ with the following switch(es): /i $Switches"
-    Start-Process msiexec -ArgumentList "/i "$_" $Switches -NoNewWindow -Wait"
+    Start-Process msiexec -ArgumentList "/i " $_" $Switches -NoNewWindow -Wait"
     Write-Output "Setup finished with exitcode: $LastExitCode"
   }
 }
