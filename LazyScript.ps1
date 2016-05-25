@@ -95,12 +95,10 @@ function StartDownloading () {
       if ($Error) { throw "" }
       Write-Host "`'$FileName`' downloaded successfully!" -ForegroundColor "GREEN"
     }
-
     else {
       Write-Host "`'$FileName`' already exists, skipping..." -ForegroundColor "YELLOW"
     }
   }
-
   catch {
     Write-Host "`'$FileName`' failed, check the link and try again..." -ForegroundColor "RED"
   }
