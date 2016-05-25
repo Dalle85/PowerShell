@@ -7,7 +7,7 @@ You need to run this script as local administrator
 
 .USAGE
 Inspect websites by using the following command:
-(wget –URI ‘https://notepad-plus-plus.org/download/v6.9.2.html’).Links
+(wget –URI ‘YOUR_LINK’).Links
 
 .AUTHOR
 Dalle, 2016-05-21
@@ -52,9 +52,7 @@ $RURLS = @(
   "http://www.snapfiles.com/downloads/tixati/dltixati.html" # Tixati x64
 )
 
-
 # Check if the download-folder exists, else it will be created.
-# Change this one if necessary
 $DownloadPath = "$PSScriptRoot\Downloads"
 
 try {
@@ -108,10 +106,10 @@ Write-Host "Processing redirected links..."
 
 foreach ($URL in $RURLS) {
   $URL = ((wget $URL).Links | 
-    Where { `
-            $_.href -like "*7z*x64*" -or $_.href -like "*filezilla*64*" -or $_.href -like "*flashplayer*" -or
-            $_.innerText -like "*offline*64-bit*" -or $_.href -like "*keepass*setup*" -or $_.href -like "*npp*installer*" -or
-            $_.href -like "*win64*firefox*" -or $_.href -like "*tixati*64*"
+    Where {
+      $_.href -like "*7z*x64*" -or $_.href -like "*filezilla*64*" -or $_.href -like "*flashplayer*" -or
+      $_.innerText -like "*offline*64-bit*" -or $_.href -like "*keepass*setup*" -or $_.href -like "*npp*installer*" -or
+      $_.href -like "*win64*firefox*" -or $_.href -like "*tixati*64*"
     }).href
   StartDownloading
 }
