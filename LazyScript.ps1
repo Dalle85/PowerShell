@@ -1,14 +1,11 @@
 <#
 .DESCRIPTION
 This script will download the latest executables of the specified applications to .\Downloads using Invoke-Webrequest
-
 .NOTES
 You need to run this script as local administrator
-
 .USAGE
 Inspect websites by using the following command:
 (Invoke-Webrequest –URI ‘YOUR_LINK’).Links
-
 .AUTHOR
 Dalle, 2016-05-21
 #>
@@ -68,7 +65,7 @@ function CreateDownloadPath () {
 
   try {
     #Return true if the Destination Folder exists, otherwise return false 
-    if (!(Test-Path "$DownloadPath" -PathType Container)) {   
+    if (!(Test-Path "$DownloadPath" -PathType Container)) {
       #Creates the destination folder if it does not exist 
       New-Item $DownloadPath -ItemType Directory | Out-Null
       Write-Information "$DownloadPath does not exist, creating..."
@@ -91,7 +88,7 @@ function StartDownloading () {
     if (!(Test-Path "$DownloadPath\$FileName")) {
       Write-Progress -Activity "Downloading `'$FileName`' to `'$DownloadPath`'" -Status "Please wait..."
       #Try to download the file, otherwise output error message
-      Invoke-Webrequest "$URL" -OutFile $DownloadPath\$FileName -ErrorVariable Error
+      Invoke-WebRequest "$URL" -OutFile $DownloadPath\$FileName -ErrorVariable Error
       if ($Error) { throw "" }
       Write-Host "`'$FileName`' downloaded successfully!" -ForegroundColor "GREEN"
     }
@@ -114,7 +111,7 @@ foreach ($URL in $DURLS) {
 
 #Find the target link and download it
 foreach ($URL in $RURLS) {
-  $URL = ((Invoke-Webrequest $URL).Links |
+  $URL = ((Invoke-WebRequest $URL).Links |
     Where {
       $_.href -like "*7z*x64*" -or
       $_.href -like "*filezilla*64*" -or
