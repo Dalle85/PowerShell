@@ -1,4 +1,4 @@
-﻿<#
+<#
 
 .SYNOPSIS
 This is a simple Powershell script to install any files located within the application
@@ -86,11 +86,11 @@ Start-Transcript -Path $LogFile -Force
 
 Write-Information "$ScriptName"
 Write-Information "-------------------------------------------------"
-Write-Information "ScriptDir: $PSScriptRoot"
-Write-Information "SourcePath: $SourcePath"
-Write-Information "ScriptName: $ScriptName"
-Write-Information "Integration with MDT(LTI/ZTI): $MDTIntegration"
-Write-Information "Log: $LogFile"
+Write-Information "ScriptDir.....: $PSScriptRoot"
+Write-Information "SourcePath....: $SourcePath"
+Write-Information "ScriptName....: $ScriptName"
+Write-Information "MDTIntegration: $MDTIntegration"
+Write-Information "Log...........: $LogFile"
 Write-Information ""
 
 
@@ -98,8 +98,8 @@ Write-Information ""
 # Start wrapping
 ######################################################################################
 
-$Installers = Get-ChildItem -Path $SourcePath -Recurse –Include "*.msi, *.exe"
-$Installers | % {
+$Installers = Get-ChildItem -Path $SourcePath -Recurse –Include "*.msi, *.exe" | %
+{
 
   if ($_.Name -like "*.exe")
   {
@@ -113,6 +113,27 @@ $Installers | % {
     Write-Host "Attempting to install $_ with the following switch(es): /i $Switches"
     Start-Process msiexec -ArgumentList "/i  $_ $Switches -NoNewWindow -Wait"
     Write-Host "Setup finished with exitcode: $LastExitCode"
+  }
+
+  elseif ($_.Name -like "*.ps1")
+  {
+    Write-Host "Attempting to run script $_"
+    Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File $_ -NoNewWindow -Wait"
+    Write-Host "Script finished with exitcode: $LastExitCode"
+  }
+
+  elseif ($_.Name -like "*.cmd" -or "*.bat")
+  {
+    Write-Host "Attempting to run script $_"
+    Start-Process cmd -ArgumentList "/c $_ -NoNewWindow -Wait"
+    Write-Host "Script finished with exitcode: $LastExitCode"
+  }
+
+  elseif ($_.Name -like "*.reg")
+  {
+    Write-Host "Attempting to import $_ to the registry:"
+    Start-Process cmd -ArgumentList "/c reg import $_ -NoNewWindow -Wait"
+    Write-Host "Import finished with exitcode: $LastExitCode"
   }
 
 }
