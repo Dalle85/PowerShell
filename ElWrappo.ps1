@@ -98,13 +98,13 @@ Write-Information ""
 # Start wrapping
 ######################################################################################
 
-$Installers = Get-ChildItem -Path $SourcePath -Recurse –Include "*.msi, *.exe" | %
-{
+$Installers = Get-ChildItem -Path $SourcePath -Recurse –Include *.msi, *.exe
+$Installers | % {
 
   if ($_.Name -like "*.exe")
   {
     Write-Host "Attempting to install $_ with the following switch(es): $Switches"
-    Start-Process "$_ -ArgumentList $Switches -NoNewWindow -Wait"
+    Start-Process "$_" "-ArgumentList $Switches -NoNewWindow -Wait"
     Write-Host "Setup finished with exitcode: $LastExitCode"
   }
   
@@ -118,20 +118,21 @@ $Installers = Get-ChildItem -Path $SourcePath -Recurse –Include "*.msi, *.exe"
   elseif ($_.Name -like "*.ps1")
   {
     Write-Host "Attempting to run script $_"
-    Start-Process powershell -ArgumentList "-ExecutionPolicy Bypass -File $_ -NoNewWindow -Wait"
+    Start-Process "$_ " "-ArgumentList -ExecutionPolicy Bypass -NoNewWindow -Wait"
     Write-Host "Script finished with exitcode: $LastExitCode"
   }
 
   elseif ($_.Name -like "*.cmd" -or "*.bat")
   {
     Write-Host "Attempting to run script $_"
-    Start-Process cmd -ArgumentList "/c $_ -NoNewWindow -Wait"
+    Start-Process "$_ " "-ArgumentList -NoNewWindow -Wait"
     Write-Host "Script finished with exitcode: $LastExitCode"
   }
 
   elseif ($_.Name -like "*.reg")
   {
     Write-Host "Attempting to import $_ to the registry:"
+    Start-Process "reg import $_ " "-ArgumentList -NoNewWindow -Wait"
     Start-Process cmd -ArgumentList "/c reg import $_ -NoNewWindow -Wait"
     Write-Host "Import finished with exitcode: $LastExitCode"
   }
