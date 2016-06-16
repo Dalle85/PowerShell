@@ -1,4 +1,5 @@
-#PowerShell
+Welcome to my GitHub-repository!
+
 In this repository you'll find random scripts used for daily IT automation tasks.
 Any script found is provided "AS IS" with no warranties, confers no rights and will not supported by the author.
 
