@@ -1,0 +1,87 @@
+<xml>
+
+    <Application>
+        <ApplicationName>Install - 7-Zip (Latest) - x64</ApplicationName>
+        <DownloadURL>http://www.snapfiles.com/downloads/7zip/dl7zip.html</DownloadURL>
+        <FileName></FileName>
+        <Keyword>*7z*x64*exe*</Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - Adobe Flash Player (Latest) - x86</ApplicationName>
+        <DownloadURL>http://fpdownload.macromedia.com/pub/flashplayer/latest/help/install_flash_player.exe</DownloadURL>
+        <FileName></FileName>
+        <Keyword></Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - Adobe Flash Player for IE (Latest) - x86</ApplicationName>
+        <DownloadURL>http://www.snapfiles.com/downloads/flashplayerie/dlflashplayerie.html</DownloadURL>
+        <FileName></FileName>
+        <Keyword>*flashplayer*exe*</Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - Citrix Receiver (Latest) - x86</ApplicationName>
+        <DownloadURL>https://downloadplugins.citrix.com/Windows/CitrixReceiverWeb.exe</DownloadURL>
+        <FileName></FileName>
+        <Keyword></Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - FileZilla (Latest) - x64</ApplicationName>
+        <DownloadURL>https://sourceforge.net/projects/filezilla/files/latest/download</DownloadURL>
+        <FileName></FileName>
+        <Keyword>*filezilla*64*exe*</Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - Google Chrome (Latest) - x64</ApplicationName>
+        <DownloadURL>https://dl.google.com/dl/chrome/install/googlechromestandaloneenterprise64.msi</DownloadURL>
+        <FileName></FileName>
+        <Keyword></Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - Java Runtime (Latest) - x86-x64</ApplicationName>
+        <DownloadURL>http://www.java.com/en/download/manual.jsp</DownloadURL>
+        <FileName>Java_x64_latest.exe</FileName>
+        <Keyword>*windows*offline*64*bit*</Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - Java Runtime (Latest) - x86-x64</ApplicationName>
+        <DownloadURL>http://www.java.com/en/download/manual.jsp</DownloadURL>
+        <FileName>Java_x86_latest.exe</FileName>
+        <Keyword>*windows*offline</Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - KeePass (Latest) - x86</ApplicationName>
+        <DownloadURL>https://sourceforge.net/projects/keepass/files/latest/download</DownloadURL>
+        <FileName></FileName>
+        <Keyword>*keepass*setup*exe*</Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - Mozilla FireFox (Latest) - x64</ApplicationName>
+        <DownloadURL>http://www.snapfiles.com/downloads/phoenixmoz/dlphoenixmoz.html</DownloadURL>
+        <FileName></FileName>
+        <Keyword>*win64*firefox*exe*</Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - Notepad++ (Latest) - x86</ApplicationName>
+        <DownloadURL>http://www.snapfiles.com/downloads/notepadplus/dlnotepadplus.html</DownloadURL>
+        <FileName></FileName>
+        <Keyword>*npp*installer*</Keyword>
+    </Application>
+
+    <Application>
+        <ApplicationName>Install - TeamViewer (Latest) - x86</ApplicationName>
+        <DownloadURL>http://download.teamviewer.com/download/TeamViewer_Setup.exe</DownloadURL>
+        <FileName></FileName>
+        <Keyword></Keyword>
+    </Application>
+
+</xml>
