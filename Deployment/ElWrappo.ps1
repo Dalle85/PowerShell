@@ -1,138 +1,199 @@
-﻿<#
-
-.SYNOPSIS
-This is a simple Powershell script to install any files located within the application
-folder of your deployment share.
-
-.DESCRIPTION
-Even though this script will work standalone, this Powershell-wrapper is intended
-to use in conjunction with my other script - KeepItUpdated.ps1 (a script to automatically
-download the latest executables e web and replace the files in your deployment share.
-
-The script will install any *.exe or *.msi file located within the source folder,
-so just throw any (or multiple) executable inside the source folder and the script will
-try to install it.
-
-This script can install multiple multiple executables stored within the source-folder,
-but we will only be passing the the silent switch once, the reason we use this script
-is rather so that we don't have to change the the scripts or commandlines everytime
-we download a new version of an application.
-
-.EXAMPLE
-You need to use the following structure for the script to work.
-
-.\Install - MyApplication (Latest) - x86-x64
-.\Install - MyApplication (Latest) - x86-x64\ElWrappo.ps1
-.\Install - MyApplication (Latest) - x86-x64\Source
-.\Install - MyApplication (Latest) - x86-x64\Source\MyApplication.exe
-
-Make sure you give the application and folder a good name, as the logfile will use the
-same name as that of your folder. Import the application to your console, either by
-using the console or scripts, then set the install command to:
-
-PowerShell.exe –ExecutionPolicy ByPass -WindowStyle Hidden –File ElWrappo.ps1
-
-.DISCLAIMER
-This script is provided "AS IS" with no warranties, confers no rights and
-is not supported by the author.
-
+<#
+ 
 .AUTHOR
-Victor Dahlberg, Office IT-Partner
-
-.DATE
-2016-06-02
-
-.LINK
-http://deployman.wordpress.com
-
+    Victor Dahlberg, Office IT-Partner, 2017-02-17
+ 
+.VERSION
+    1.2
+ 
+.SYNOPSIS
+    This script will attempt to silently install or run each of the follow extensions: *.exe, *.msi, *.ps1, *.cmd, *.bat, *.reg
+    You will need to add an extra switch to exe-files to make it install silently, msi-files will always install silently and if an MST or MSP-file is found
+    in the source folder the script will automatically add it to the installer arguments.
+ 
+.EXAMPLE
+    Add any extra switch and run the script standalone or as an imported application in MDT/SCCM.
+        MSI-files will always install silently, but you might want to add extra switches such as "/ALLOWADDSTORE=N" to a Citrix Receiver installation.
+        EXE-files will need a switch as the silent argument can sometimes differ.
+ 
+    Execute an imported application with the following parameters:
+       PowerShell.exe –ExecutionPolicy ByPass -WindowStyle Hidden -NonInteractive -NoProfile –File ElWrappo.ps1
+ 
+.WARNING
+    This script is provided "AS IS" with no warranties and is not supported by the author.
+ 
 #>
-
-########################################################################################################
-# Set variables
-########################################################################################################
-
-# Switch to perform a silent installation
-$Switches = "/S"
-
-$SourcePath = "$PSScriptRoot\Source"
-$ScriptName = Split-Path $PSScriptRoot -Leaf
-
-
-########################################################################################################
-# Try to import the TaskSequence Environment
-########################################################################################################
-
-try
-{
-  $TSEnv = New-Object -ComObject Microsoft.SMS.TSEnvironment
-  $MDTIntegration = "YES"
-  $LogPath = $TSEnv.Value("LogPath")
-  $LogFile = "$LogPath\$ScriptName.txt"
+ 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Variables
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+# Optional switches for a silent install
+$extraSwitches = ""
+ 
+# Set source folder
+$sourceFolder = Join-Path -Path $PSScriptRoot -ChildPath "Source"
+ 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Start-Logging: Try to import TaskSequence Environment, return location for logs and start logging
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+function Start-Logging {
+   
+    try {
+        $ts = New-Object -ComObject Microsoft.SMS.TSEnvironment -ErrorAction Stop
+   
+        if ($ts.Value("LogPath") -ne "") {
+            $logPath = $ts.Value("LogPath")
+        }
+ 
+        else {
+            $logPath = $ts.Value("_SMSTSLogPath")
+        }
+    }
+ 
+    catch {
+        $logPath = $ENV:TEMP
+    }
+ 
+    finally {
+        $logName = Split-Path -Path $MyInvocation.ScriptName -Leaf
+        $logDir = Join-Path -Path $LogPath -ChildPath "$($LogName).log"
+ 
+        Start-Transcript -Path $LogDir -Force -Append | Out-Null
+    }
 }
-
-catch
-{
-  $MDTIntegration = "NO"
-  $LogPath = $env:TEMP
-  $LogFile = "$LogPath\$ScriptName.txt"
+ 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Stop-Logging:
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+function Stop-Logging {
+    Stop-Transcript
 }
-
-
-########################################################################################################
-# Start logging and output some useful information to the logfile
-########################################################################################################
-
-Start-Transcript -Path $LogFile -Force
-
-Write-Information "$ScriptName"
-Write-Information "-------------------------------------------------"
-Write-Information "ScriptDir.....: $PSScriptRoot"
-Write-Information "SourcePath....: $SourcePath"
-Write-Information "ScriptName....: $ScriptName"
-Write-Information "MDTIntegration: $MDTIntegration"
-Write-Information "Log...........: $LogFile"
-Write-Information ""
-
-
-########################################################################################################
-# Start wrapping
-########################################################################################################
-
-$Installers = Get-ChildItem -Path $SourcePath -Recurse –Include *.msi, *.exe, *.ps1, *.cmd, *.bat, *.reg
-$Installers | % {
-
-  if ($_.Name -like "*.exe")
-  {
-    Write-Host "Attempting to install $_ with the following switch(es): $Switches"
-    Start-Process $_ -ArgumentList $Switches -NoNewWindow -Wait
-  }
-  
-  elseif ($_.Name -like "*.msi")
-  {
-    Write-Host "Attempting to install $_ with the following switch(es): /i $Switches"
-    $Arg = "/i " + '"' + $_ + '" ' + $Switches
-    Start-Process msiexec -ArgumentList $Arg -NoNewWindow -Wait
-  }
-
-  elseif ($_.Name -like "*.ps1")
-  {
-    Write-Host "Attempting to run script $_"
-    Start-Process $_ -ArgumentList -ExecutionPolicy Bypass -NoNewWindow -Wait
-  }
-
-  elseif ($_.Name -like "*.cmd" -or "*.bat")
-  {
-    Write-Host "Attempting to run script $_"
-    Start-Process $_  -ArgumentList -NoNewWindow -Wait
-  }
-
-  elseif ($_.Name -like "*.reg")
-  {
-    Write-Host "Attempting to import $_ to the registry:"
-    Start-Process reg import $_  -ArgumentList -NoNewWindow -Wait
-  }
-
+ 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+# ProcessFiles: Install or run all files in the source folder
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+function ProcessFiles {
+    param (
+        [Parameter(Mandatory=$false)]
+        [ValidateNotNullOrEmpty()]
+        [string]$sourceFolder,
+ 
+        [Parameter(Mandatory=$false)]
+                         [AllowNull()]
+        [string]$extraSwitches
+    )
+ 
+    begin {
+        $ErrorActionPreference = "Stop"
+    }
+ 
+            process {
+       
+        # Specify which extensions to include in the search, not all are supported
+        $extensions = "*.exe", "*.msi", "*.ps1", "*.cmd", "*.bat", "*.reg"
+ 
+        # Look in source folder for extensions to process
+        foreach ($item in Get-ChildItem $sourceFolder -Include $extensions -Recurse) {
+ 
+            Write-Information "Processing $item..."
+ 
+            try {
+ 
+                # -----------------------------------------------------------------------------------------------------------------------------------------------
+                # Windows executables
+                # -----------------------------------------------------------------------------------------------------------------------------------------------
+ 
+                if ($item.Extension -eq ".exe") {
+ 
+                    $installArgs = @()
+               
+                    # Add extra switches
+                    if ($extraSwitches) {
+                                         $installArgs += $extraSwitches
+                    }
+               
+                    $installArgs = $installArgs -join " "
+ 
+                    Write-Information "Using switches '$installArgs'"
+                    Start-Process -FilePath "$item" -ArgumentList $installArgs -Wait
+                }
+ 
+                # -----------------------------------------------------------------------------------------------------------------------------------------------
+                # Windows installers
+                # -----------------------------------------------------------------------------------------------------------------------------------------------
+ 
+                elseif ($item.Extension -eq ".msi") {
+ 
+                    $mstFilePath = Get-ChildItem $SourceFolder -Include "*.mst" -Recurse
+                    $mspFilePath = Get-ChildItem $SourceFolder -Include "*.msp" -Recurse
+ 
+                    $installArgs = @()
+                    $installArgs += "/i `"$item`" /qn"
+ 
+                    # Apply transform if MST-file is found
+                    if ($mstFilePath) {
+                        $installArgs += "TRANSFORMS=`"$mstFilePath`""
+                    }
+               
+                    # Apply patch if MSP-file is found                  
+                    if ($mspFilePath) {
+                        $installArgs += "PATCH=`"$mspFilePath`""
+                    }
+ 
+                    # Add extra switches
+                    if ($extraSwitches) {
+                        $installArgs += $extraSwitches
+                    }
+ 
+                    $installArgs += "REBOOT=ReallySuppress ALLUSERS=1"
+                    $installArgs = $installArgs -join " "
+ 
+                    Write-Information "Using switches '$installArgs'"
+                    Start-Process -FilePath "msiexec.exe" -ArgumentList $installArgs -Wait
+                }
+ 
+                # -----------------------------------------------------------------------------------------------------------------------------------------------
+                # PowerShell-scripts
+                # -----------------------------------------------------------------------------------------------------------------------------------------------
+ 
+                elseif ($item.Extension -eq ".ps1") {
+                    Invoke-Expression "& `"$item`"" | Out-Null
+                }
+ 
+                # -----------------------------------------------------------------------------------------------------------------------------------------------
+                # Batch-scripts
+                # -----------------------------------------------------------------------------------------------------------------------------------------------
+                   
+                elseif ($item.Extension -eq ".cmd" -or ".bat") {
+                    Start-Process -FilePath "$item" -Wait
+                }
+          
+                # -----------------------------------------------------------------------------------------------------------------------------------------------
+                # Registry values
+                # -----------------------------------------------------------------------------------------------------------------------------------------------
+                  
+                elseif ($item.Extension -eq ".reg") {
+                    Start-Process -FilePath "cmd.exe" -WindowStyle Minimized -ArgumentList '/c reg import "' + $item + '"' -Wait
+                }
+ 
+                Write-Information "Finished processing $item..."
+            }
+ 
+            catch {
+                    Write-Warning "Failed to process! $($_.Exception.Message)"
+            }
+        }
+    }
 }
-
-Write-Information ""
-Stop-Transcript
+ 
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+# Call functions
+# ---------------------------------------------------------------------------------------------------------------------------------------------------------------
+ 
+Start-Logging
+ProcessFiles -sourceFolder $sourceFolder -extraSwitches $extraSwitches
+Stop-Logging
