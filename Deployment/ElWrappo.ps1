@@ -113,7 +113,7 @@ function ProcessFiles {
                
                     # Add extra switches
                     if ($extraSwitches) {
-                                         $installArgs += $extraSwitches
+                        $installArgs += $extraSwitches
                     }
                
                     $installArgs = $installArgs -join " "
