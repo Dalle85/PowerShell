@@ -83,7 +83,7 @@ function ProcessFiles {
         [string]$sourceFolder,
  
         [Parameter(Mandatory=$false)]
-                         [AllowNull()]
+        [AllowNull()]
         [string]$extraSwitches
     )
  
