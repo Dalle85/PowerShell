@@ -90,8 +90,8 @@ function ProcessFiles {
     begin {
         $ErrorActionPreference = "Stop"
     }
- 
-            process {
+        
+        process {
        
         # Specify which extensions to include in the search, not all are supported
         $extensions = "*.exe", "*.msi", "*.ps1", "*.cmd", "*.bat", "*.reg"
