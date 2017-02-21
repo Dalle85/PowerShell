@@ -1,255 +1,190 @@
-﻿#requires -version 3
-
 <#
 
-.SYNOPSIS
-This is a simple Powershell script to download files to your MDT DeploymentShare
-
-.DESCRIPTION
-The script itself will try to download the files using Invoke-Webrequest, it's main objective is to
-automate the task of updating the applications in your MDT DeploymentShare. 
-
-.EXAMPLE
-./KeepItUpdated.ps1
-
-.NOTES
-Make sure you run this script with sufficient share permissions.
-
-.DISCLAIMER
-This script is provided "AS IS" with no warranties, confers no rights and is not supported by the author.
-
-.AUTHOR
-Victor Dahlberg, Office IT-Partner
-
-.DATE
-2016-06-02
-
-.LINK
-http://deployman.wordpress.com
+File:      KeepItUpdated.ps1
+Version:   1.1, updated 2017-01-11
+Author:    Victor Dahlberg, Office IT-Partner
+Blog:      http://deployman.wordpress.com
+Purpose:   The script itself will try to download files using Invoke-Webrequest, it's main objective is to
+           automate the task of updating the applications in your MDT DeploymentShare.
+Usage:   - Run Powershell Script with the following parameters:
+           ./KeepItUpdated.ps1
+Warning:   This script is provided "AS IS" with no warranties and is not supported by the author.
 
 #>
 
-Clear-Host
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# CreateFolders: Function to create download folder
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-##################################################################################################################
-# Set variables
-##################################################################################################################
+Function CreateFolders {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [String]$CurrPath
+    )
 
-$DownloadFolder = "$PSScriptRoot\Downloads"
-$ApplicationShare = "$PSScriptRoot\Applications"
+    Try {
 
-$Time = (Get-Date -Format 'yyyy-MM-dd_HH_mm_ss')
-$LogPath = "$PSScriptRoot\DownloadLog_$Time.txt"
-
-
-##################################################################################################################
-# Function to create download folder
-##################################################################################################################
-
-function CreateDownloadFolder ()
-{
-  try
-  {
-    
-    if (Test-Path "$FinalDownloadFolder")
-    {
-      Write-Host "$Step1$Skip" -ForegroundColor Yellow
+        # Create the download path if it doesn't already exist
+        If (!(Test-Path $CurrPath)) {
+            New-Item "$CurrPath" -ItemType Directory -Force -ErrorAction Stop | Out-Null
+        }
     }
-
-    else
-    {
-      New-Item "$FinalDownloadFolder" -ItemType Directory -ErrorAction Stop | Out-Null
-      Write-Host "$Step1$Done" -ForegroundColor Green
+         
+    Catch {
+        Write-Warning "Failed to create download folder with error message: $($_.Exception.Message)"
+        Break
     }
-
-  }
-
-  catch
-  {
-    $ErrorMessage = $_.Exception.Message
-    Write-Host "$Step1$Fail" -ForegroundColor Red
-    Write-Information "Failed to create folder with error message: $ErrorMessage" .
-    break
-  }
-
 }
 
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# DownloadFiles: Function to download files
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-##################################################################################################################
-# Function to download files
-##################################################################################################################
+Function DownloadFiles {
+    Param(
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [String]$DownloadUrl,
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [String]$CurrFile
+    )
 
-function DownloadFiles ()
-{
-  try
-  {
+    Try {
 
-    Write-Progress -Activity "Downloading $FileName" -Status "Please wait..."
-    Invoke-WebRequest $DownloadURL -OutFile $FinalDownloadFolder\$Filename -ErrorAction Stop
-    Write-Host "$Step2$Done" -ForegroundColor Green
-  }
-
-  catch
-  {
-    $ErrorMessage = $_.Exception.Message
-    Write-Information "Failed to download application with error message: $ErrorMessage" .
-    Write-Host "$Step2$Fail" -ForegroundColor Red
-    break
-  }
-
-}
-
-
-##################################################################################################################
-# Function to compare file versions and replace files
-##################################################################################################################
-
-function CompareFilesAndReplace ()
-{
-
-  try
-  {
-
-    $NewFile = (Get-Item $FinalDownloadFolder\$Filename -ErrorAction SilentlyContinue)
-    $OldFile = (Get-Item $FinalApplicationShare\*.* -ErrorAction SilentlyContinue)
-
-    $NewFileVersion = $NewFile.VersionInfo.FileVersion -replace ",","." -replace " ",""
-    $OldFileVersion = $OldFile.VersionInfo.FileVersion -replace ",","." -replace " ",""
-
-    if ($OldFile -and $NewFile)
-    {
-
-      if ($NewFileVersion -gt $OldFileVersion)
-      {
-        Write-Host "$Step3$Done" -ForegroundColor Green
-        Remove-Item "$OldFile" -Force -ErrorAction Stop
-        Copy-Item "$NewFile" -Destination "$FinalApplicationShare" -Force -ErrorAction Stop
-        Write-Host "$Step4$Done" -ForegroundColor Green
-        Write-Host ""
-        Write-Host "INFO: $NewFileVersion > $OldFileVersion" -ForegroundColor Cyan
-        Write-Host "INFO: An update was found, files were replaced..." -ForegroundColor Cyan
-      }
-      
-      elseif ($NewFileVersion -eq "" -and $OldFileVersion -eq "")
-      {
-        Write-Host "$Step3$Done" -ForegroundColor Green
-        Remove-Item "$OldFile" -Force -ErrorAction Stop
-        Copy-Item "$NewFile" -Destination "$FinalApplicationShare" -Force -ErrorAction Stop
-        Write-Host "$Step4$Done" -ForegroundColor Green
-        Write-Host ""
-        Write-Host "INFO: No version found, took default action to replace files." -ForegroundColor Cyan
-      }
-
-      elseif ($NewFileVersion -eq $OldFileVersion)
-      {
-        Write-Host "$Step3$Done" -ForegroundColor Green
-        Write-Host ""
-        Write-Host "INFO: Downloaded version $NewFileVersion, current version $OldFileVersion" -ForegroundColor Cyan
-        Write-Host "INFO: File versions are equal, keeping existing file." -ForegroundColor Cyan
-      }
-
+        # Download the files
+        $ProgressPreference = "SilentlyContinue"
+        Write-Progress -Activity "Downloading $DispName" -Status "Please wait..."
+        Invoke-WebRequest $DownloadUrl -OutFile $CurrFile -ErrorAction Stop | Out-Null
+        Write-Host "[?] File downloaded successfully" -ForegroundColor Cyan
     }
 
-    else
-    {
-      Write-Host ""
-      Write-Host "INFO: Running instance in download only." -ForegroundColor Cyan
-      Write-Information "Unable to find any files in the $FinalApplicationShare directory, if this is supposed to be true nevermind this message, otherwise check the path..."
+    Catch {
+        Write-Warning "Failed to download application with error message: $($_.Exception.Message)"
     }
-
-  }
-
-  catch
-  {
-    $ErrorMessage = $_.Exception.Message
-    Write-Information "Failed to query or replace application with error message: $ErrorMessage" .
-    Write-Host "$Step3$Fail" -ForegroundColor Red
-    break
-  }
-
 }
 
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------------
+# CompareFiles: Function to compare file versions and replace files
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-##################################################################################################################
+Function CompareFiles {
+    Param (
+        [Parameter(Mandatory=$true)]
+        [ValidateNotNullOrEmpty()]
+        [String]$CurrFile,
+        [Parameter(Mandatory=$false)]
+        [String]$PrevFile
+    )
+
+    Try {
+
+        # Check if there is any file to compare with
+        If ($PrevFile | Test-Path -ErrorAction SilentlyContinue) {
+
+            # Check for matching hash
+            If ((Get-FileHash $CurrFile).Hash -eq (Get-FileHash $PrevFile).Hash) {
+                Write-Host "[?] File hash match, keeping existing file" -ForegroundColor Cyan
+            }
+     
+            # If hash does not match
+            Else {
+
+                # Loop until file has been successfully removed
+                Do {
+                    Remove-Item "$PrevFile" -Force -Recurse -ErrorAction Stop
+                }
+            
+                # Verify that the old file has been removed before trying to copy the new one
+                While (!(Test-Path -Path "$PrevFile"))
+                Copy-Item "$CurrFile" -Destination "$PrevPath" -Force -ErrorAction Stop
+                Write-Host "[?] File hash do not match, files were replaced" -ForegroundColor Cyan
+            }
+        }
+    }
+
+    Catch {
+        Write-Warning "Failed to replace application with error message: $($_.Exception.Message)"
+        Break
+    }
+}
+
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 # Begin processing the XML-data and start up the main functions of the script
-##################################################################################################################
+# -----------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-Start-Transcript -Path "$LogPath" -Force
+$LogPath = Join-Path -Path $PSScriptRoot -ChildPath "$($MyInvocation.MyCommand.Name)_$(Get-Date -Format 'yyyy-MM-dd_HH_mm_ss').log"
 
-#Import XML-data
-try
-{
-  [xml]$DownloadSettings = Get-Content "$PSScriptRoot\DownloadSettings.xml"
+Start-Transcript -Path "$LogPath" -Force | Out-Null
+
+# Import XML-data
+Try {
+    [xml]$DownloadSettings = Get-Content $(Join-Path -Path $PSScriptRoot -ChildPath "DownloadSettings.xml")
 }
 
-catch
-{
-  $ErrorMessage = $_.Exception.Message
-  Write-Host "Failed to get settings from $DownloadSettings with error message: $ErrorMessage" .
-
-  break
+Catch {
+    Write-Warning "Failed to read XML-fil with error message: $($_.Exception.Message)"
+    Break
 }
 
-#Awesome special effects
-$Step1 = "STEP: Create the download folder..."
-$Step2 = "STEP: Download the application... "
-$Step3 = "STEP: Compare the applications... "
-$Step4 = "STEP: Replace the applications... "
+# Reset progress bar counter
+$Counter = 0
 
-$Done = "`t`t`t`t`t`t`t [DONE]"
-$Fail = "`t`t`t`t`t`t`t [FAIL]"
-$Skip = "`t`t`t`t`t`t`t [SKIP]"
+# Process XML-data and set data as variables
+Foreach ($Application in $DownloadSettings.xml.Application) {
 
-#Process XML-data
-foreach ($Application in $DownloadSettings.xml.Application)
-{
+    $DownloadUrl = $Application.DownloadUrl
+    $ApplicationName = $Application.ApplicationName
+    $Filename = $Application.Filename
+    $Keyword = $Application.Keyword
 
-  $DownloadURL = $Application.DownloadURL
-  $FolderName = $Application.ApplicationName
-  $Filename = $Application.Filename
-  $Keyword = $Application.Keyword
-  
-  $FinalDownloadFolder = "$DownloadFolder\$Foldername\Source\"
-  $FinalApplicationShare ="$ApplicationShare\$Foldername\Source\"
+    Try {
 
-  #Use these settings if a link is present and keyword and filename are not set
-  if (($DownloadURL) -and (!$Keyword) -and (!$Filename))
-  {
-    $Block = "[1]"
-    $FileName = $DownloadURL.Split('/')[-1].Split('?')[0] -replace "%20","_"
-  }
+        # Use these settings if link and keyword is found but filename is not set
+        If ($DownloadUrl -and $Keyword -and !$Filename) {   
+            $DownloadUrl = ((Invoke-WebRequest $DownloadUrl).Links | Where {$_.href -like "*http*$Keyword*"}).href
+        }
 
-  #Use these settings if link and keyword has a value, but filename is not set
-  elseif (($DownloadURL) -and ($Keyword) -and (!$Filename))
-  {
-    $Block = "[2]"
-    $DownloadURL = ((Invoke-WebRequest $DownloadURL).Links | Where { $_.href -like "*http*$Keyword*" }).href
-    $Filename = $DownloadURL.Split('/')[-1].Split('?')[0] -replace "%20","_"
-  }
+        # Use these settings if link, keyword and filename are all found
+        ElseIf ($DownloadUrl -and $Keyword -and $Filename) {
+            $DownloadUrl = ((Invoke-WebRequest $DownloadUrl).Links | Where {$_.href -like "*http*$Keyword" -or $_.innerText -like "$Keyword"}).href
+        }
+    }
 
-  #Use these settings if link, keyword and filename all have values
-  elseif (($DownloadURL) -and ($Keyword) -and ($Filename))
-  {
-    $Block = "[3]"
-    $DownloadURL = ((Invoke-WebRequest $DownloadURL).Links | Where { $_.href -like "*http*$Keyword" -or $_.innerText -like "$Keyword" }).href
-  }
+    Catch {
+        Write-Warning "Failed to query $DownloadUrl with error message: $($_.Exception.Message)"
+    }
 
-  #Output some useful information to the logs, in case of troubleshooting
-  Write-Host ""
-  Write-Host "$Foldername" -ForegroundColor White;
-  Write-Host "-------------------------------------------------------------------"
-  Write-Information "ConditionBlock: $Block"
-  Write-Information "DownloadFolder: $FinalDownloadFolder"
-  Write-Information "DownloadURL...: $DownloadURL"
-  Write-Information "Filename......: $Filename"
-  Write-Information "Keyword.......: $Keyword"
+    # Gather final variables
+    $Filename = $DownloadUrl.Split('/')[-1].Split('?')[0] -Replace "%20","_"
+    $DispName = $ApplicationName -Replace "Install - ",""
 
-  CreateDownloadFolder
-  DownloadFiles
-  CompareFilesAndReplace
+    $CurrPath = Join-Path -Path $PSScriptRoot -ChildPath "Downloads" | Join-Path -ChildPath $ApplicationName | Join-Path -ChildPath "Source"
+    $PrevPath = Join-Path -Path $PSScriptRoot -ChildPath "Applications" | Join-Path -ChildPath $ApplicationName | Join-Path -ChildPath "Source"
+    
+    $CurrFile = Join-Path -Path $CurrPath -ChildPath "$Filename" -ErrorAction SilentlyContinue
+    $PrevFile = Join-Path -Path $PrevPath -ChildPath "*" -Resolve -ErrorAction SilentlyContinue
 
-  Write-Host "-------------------------------------------------------------------"
+    # Output useful information to the logfile in case of troubleshooting
+    Write-Host ""
+    Write-Host "$DispName" -ForegroundColor White
+    Write-Host "---------------------------------------------------------------------"
+    Write-Information "DeploymentShare: $PrevPath"
+    Write-Information "DownloadPath...: $CurrPath"
+    Write-Information "DownloadURL....: $DownloadUrl"
+    Write-Information "Filename.......: $Filename"
+    Write-Information "Keyword........: $Keyword"
+
+    # Progress bar
+    $Counter++
+    Write-Progress -Activity "Processing $($DispName)" -Status "Processing $($Counter) of $($DownloadSettings.xml.Application.Count) applications" -PercentComplete (($Counter / $DownloadSettings.xml.Application.Count) * 100)
+    Start-Sleep -Milliseconds 200
+
+    CreateFolders -CurrPath $CurrPath
+    DownloadFiles -DownloadUrl $DownloadUrl -CurrFile $CurrFile
+    CompareFiles -CurrFile $CurrFile -PrevFile $PrevFile
 }
 
-Write-Host ""
-Stop-Transcript 
+Write-Host
+Stop-Transcript
